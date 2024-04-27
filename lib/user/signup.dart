@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:communehub/loginscreen.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 // Importing a placeholder login screen
@@ -21,6 +21,9 @@ class _SignUpScreenState extends State<SignUpScreen>
   TextEditingController _passcontroller = TextEditingController();
   TextEditingController dobController = TextEditingController();
   String? genderValue;
+  TextEditingController rollNoController = TextEditingController();
+  TextEditingController departmentController = TextEditingController();
+  TextEditingController semesterController = TextEditingController();
   final _Signupkey = GlobalKey<FormState>();
   @override
   void initState() {
@@ -255,6 +258,84 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 }).toList(),
                               ),
                               SizedBox(height: 5),
+                              TextFormField(
+                                controller: rollNoController,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "Enter Roll Number";
+                                  }
+                                },
+                                decoration: InputDecoration(
+                                  suffixIcon: Icon(
+                                    Icons.check,
+                                    color: Colors.grey,
+                                  ),
+                                  hintText: 'Enter Roll Number',
+                                  labelText: 'Roll Number',
+                                  labelStyle: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              TextFormField(
+                                controller: departmentController,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "Enter Department";
+                                  }
+                                },
+                                decoration: InputDecoration(
+                                  suffixIcon: Icon(
+                                    Icons.check,
+                                    color: Colors.grey,
+                                  ),
+                                  hintText: 'Enter Department',
+                                  labelText: 'Department',
+                                  labelStyle: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              TextFormField(
+                                controller: semesterController,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "Enter Semester";
+                                  }
+                                },
+                                decoration: InputDecoration(
+                                  suffixIcon: Icon(
+                                    Icons.check,
+                                    color: Colors.grey,
+                                  ),
+                                  hintText: 'Enter Semester',
+                                  labelText: 'Semester',
+                                  labelStyle: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                ),
+                              ),
+                              SizedBox(height: 5),
                               Container(
                                 height: 55,
                                 width: 200, // Reduced width
@@ -268,31 +349,85 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 child: TextButton(
                                   onPressed: () async {
                                     if (_Signupkey.currentState!.validate()) {
-                                      UserCredential userData =
-                                          await FirebaseAuth.instance
-                                              .createUserWithEmailAndPassword(
-                                                  email: _emailcontroller.text
-                                                      .trim(),
-                                                  password: _passcontroller.text
-                                                      .trim());
-                                      if (userData != null) {
-                                        FirebaseFirestore.instance
-                                            .collection('users')
-                                            .doc(userData.user!.uid)
-                                            .set({
-                                          'uid': userData.user!.uid,
-                                          'email': userData.user!.email,
-                                          'name': namecontroller.text,
-                                          'dob': dobController.text,
-                                          'gender': genderValue,
-                                          'createdAt': DateTime.now(),
-                                          'status': 1
-                                        }).then((value) => Navigator
-                                                .pushNamedAndRemoveUntil(
-                                                    context,
-                                                    '/home',
-                                                    (route) => false));
+                                      // Check if the email is already in use
+                                      try {
+                                        UserCredential userData =
+                                            await FirebaseAuth.instance
+                                                .createUserWithEmailAndPassword(
+                                          email: _emailcontroller.text.trim(),
+                                          password: _passcontroller.text.trim(),
+                                        );
+
+                                        if (userData != null) {
+                                          // User creation successful
+                                          await FirebaseFirestore.instance
+                                              .collection('users')
+                                              .doc(userData.user!.uid)
+                                              .set({
+                                            'uid': userData.user!.uid,
+                                            'email': userData.user!.email,
+                                            'name': namecontroller.text,
+                                            'dob': dobController.text,
+                                            'gender': genderValue ?? '',
+                                            'createdAt': DateTime.now(),
+                                            'status': 1,
+                                            'roll_number':
+                                                rollNoController.text,
+                                            'department':
+                                                departmentController.text,
+                                            'semester': semesterController.text,
+                                          }).then((value) {
+                                            // Navigate to home screen
+                                            Navigator.pushNamedAndRemoveUntil(
+                                                context,
+                                                '/home',
+                                                (route) => false);
+                                          });
+                                        }
+                                      } on FirebaseAuthException catch (e) {
+                                        if (e.code == 'weak-password') {
+                                          // Password is too weak
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                  'The password provided is too weak.'),
+                                              duration: Duration(seconds: 3),
+                                            ),
+                                          );
+                                        } else if (e.code ==
+                                            'email-already-in-use') {
+                                          // Email is already in use
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                  'The account already exists for that email.'),
+                                              duration: Duration(seconds: 3),
+                                            ),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        // Other errors
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                'An error occurred while signing up.'),
+                                            duration: Duration(seconds: 3),
+                                          ),
+                                        );
                                       }
+                                    } else {
+                                      // Show a Snackbar if any field is not entered
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                              'Please fill in all the fields.'),
+                                          duration: Duration(seconds: 3),
+                                        ),
+                                      );
                                     }
                                   },
                                   child: Text(

@@ -1,5 +1,7 @@
-import 'package:communehub/homepage.dart';
-import 'package:communehub/signup.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -187,9 +189,20 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
                                 ),
                                 child: TextButton(
-                                  onPressed: () {
-                                    if (_loginKey.currentState!.validate())
-                                      Navigator.pushNamed(context, '/home');
+                                  onPressed: () async {
+                                    if (_loginKey.currentState!.validate()) {
+                                      UserCredential userdata =
+                                          await FirebaseAuth.instance
+                                              .signInWithEmailAndPassword(
+                                                  email: _emailcontroller.text
+                                                      .trim(),
+                                                  password: _passcontroller.text
+                                                      .trim());
+                                      if (userdata != null) {
+                                        Navigator.pushNamedAndRemoveUntil(
+                                            context, "/home", (route) => false);
+                                      }
+                                    }
                                   },
                                   child: Text(
                                     'SIGN IN',
@@ -234,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 children: [
                                   GestureDetector(
                                     onTap: () {
-                                      // Handle the click event for the first Google logo button
+                                      // Handlick event for the first Google logo button
                                     },
                                     child: Container(
                                       height: 30,

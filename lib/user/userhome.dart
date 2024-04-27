@@ -1,11 +1,18 @@
-import 'package:communehub/eventscreen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:communehub/events/eventscreen.dart';
+
+import 'package:communehub/user/loginscreen.dart';
+import 'package:communehub/user/userprofile.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Event {
   final String name;
   final String timings;
   final String description;
-  final String imageUrl; // New field for event image URL
+  final String imageUrl;
+  // New field for event image URL
 
   Event({
     required this.name,
@@ -15,37 +22,83 @@ class Event {
   });
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String _userName = '';
+  String _userEmail = '';
+  List<Event> _events = [];
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+    _fetchEvents();
+  }
+
+  Future<void> _fetchUserName() async {
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (userDoc.exists) {
+        setState(() {
+          _userName = userDoc['name'];
+          _userEmail = userDoc['email'];
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchEvents() async {
+    QuerySnapshot eventSnapshot =
+        await FirebaseFirestore.instance.collection('events').get();
+    setState(() {
+      _events = eventSnapshot.docs.map((doc) {
+        return Event(
+          name: doc['name'],
+          timings: doc['date'],
+          description: doc['description'],
+          imageUrl: doc['image_url'],
+        );
+      }).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Mock list of events (replace with actual data)
-    List<Event> events = [
-      Event(
-        name: 'Event 1',
-        timings: '10:00 AM - 12:00 PM',
-        description: 'Description for Event 1',
-        imageUrl: 'assets/event1.jpg',
-      ),
-      Event(
-        name: 'Event 2',
-        timings: '1:00 PM - 3:00 PM',
-        description: 'Description for Event 2',
-        imageUrl: 'assets/event1.jpg',
-      ),
-      Event(
-        name: 'Event 3',
-        timings: '4:00 PM - 6:00 PM',
-        description: 'Description for Event 3',
-        imageUrl: 'assets/event1.jpg',
-      ),
-    ];
+    // List<Event> events = [
+    //   Event(
+    //     name: 'Event 1',
+    //     timings: '10:00 AM - 12:00 PM',
+    //     description: 'Description for Event 1',
+    //     imageUrl: 'assets/event1.jpg',
+    //   ),
+    //   Event(
+    //     name: 'Event 2',
+    //     timings: '1:00 PM - 3:00 PM',
+    //     description: 'Description for Event 2',
+    //     imageUrl: 'assets/event1.jpg',
+    //   ),
+    //   Event(
+    //     name: 'Event 3',
+    //     timings: '4:00 PM - 6:00 PM',
+    //     description: 'Description for Event 3',
+    //     imageUrl: 'assets/event1.jpg',
+    //   ),
+    // ];
 
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 16.0),
+              padding: const EdgeInsets.only(left: 18.0, top: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -57,7 +110,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Austin',
+                    _userName,
                     style: TextStyle(
                       fontSize: 24, // Increased font size
                       fontWeight: FontWeight.bold,
@@ -67,11 +120,7 @@ class HomePage extends StatelessWidget {
               ),
             ),
             Spacer(), // Add Spacer to push the profile picture to the right
-            CircleAvatar(
-              radius: 30,
-              // Replace the placeholder image with the user's profile picture
-              backgroundImage: AssetImage('assets/profile.jpg'),
-            ),
+
             SizedBox(width: 16),
           ],
         ),
@@ -206,7 +255,7 @@ class HomePage extends StatelessWidget {
           SizedBox(height: 5),
           Expanded(
             child: ListView.builder(
-              itemCount: events.length,
+              itemCount: _events.length,
               itemBuilder: (BuildContext context, int index) {
                 return Container(
                   height: 160,
@@ -243,8 +292,8 @@ class HomePage extends StatelessWidget {
                             topRight: Radius.circular(10),
                             bottomRight: Radius.circular(10),
                           ),
-                          child: Image.asset(
-                            events[index].imageUrl,
+                          child: Image.network(
+                            _events[index].imageUrl, // Use network image
                             fit:
                                 BoxFit.cover, // Ensure the image covers the box
                             height: 130, // Adjust the height of the image
@@ -259,7 +308,7 @@ class HomePage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                events[index].name,
+                                _events[index].name,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 18,
@@ -267,12 +316,12 @@ class HomePage extends StatelessWidget {
                               ),
                               SizedBox(height: 8),
                               Text(
-                                'Timings: ${events[index].timings}',
+                                'Date: ${_events[index].timings}', // Correct field name
                                 style: TextStyle(fontSize: 16),
                               ),
                               SizedBox(height: 8),
                               Text(
-                                'Description: ${events[index].description}',
+                                'Description: ${_events[index].description}',
                                 style: TextStyle(fontSize: 16),
                               ),
                             ],
@@ -300,6 +349,7 @@ class HomePage extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.event),
               onPressed: () {
+                Navigator.pushNamed(context, '/communityhome');
                 // Add functionality for event button
               },
             ),
@@ -313,6 +363,106 @@ class HomePage extends StatelessWidget {
               icon: Icon(Icons.settings),
               onPressed: () {
                 // Add functionality for settings button
+              },
+            ),
+          ],
+        ),
+      ),
+      endDrawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Color.fromARGB(255, 65, 129, 166),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundImage: AssetImage('assets/profile.jpg'),
+                      ),
+                      SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _userName,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                            ),
+                          ),
+                          Text(
+                            _userEmail,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Divider(
+                    color: Colors.white,
+                    thickness: 2,
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              title: Text('Profile'),
+              onTap: () {
+                // Navigate to UserInputPage when floating action button is pressed
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UserProfilePage()),
+                );
+              },
+            ),
+            ListTile(
+              title: Text('Item 2'),
+              onTap: () {
+                // Add functionality for drawer item 2
+              },
+            ),
+            ListTile(
+              title: Text('Item 2'),
+              onTap: () {
+                // Add functionality for drawer item 2
+              },
+            ),
+            ListTile(
+              title: Text('Item 2'),
+              onTap: () {
+                // Add functionality for drawer item 2
+              },
+            ),
+            ListTile(
+              title: Text('Item 2'),
+              onTap: () {
+                // Add functionality for drawer item 2
+              },
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            ListTile(
+              title: Text('Logout'),
+              leading: Icon(Icons.logout),
+              onTap: () {
+                FirebaseAuth.instance.signOut().then((value) =>
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                        (route) => false));
+                final user = FirebaseAuth.instance.currentUser;
+                print(user!.email);
               },
             ),
           ],

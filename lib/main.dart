@@ -1,7 +1,13 @@
+import 'package:communehub/community/communityhome.dart';
+import 'package:communehub/events/eventdetails.dart';
 import 'package:communehub/firebase_options.dart';
-import 'package:communehub/homepage.dart';
-import 'package:communehub/loginscreen.dart';
-import 'package:communehub/signup.dart';
+
+import 'package:communehub/onboarding/onboarding.dart';
+import 'package:communehub/onboarding/useroradmin.dart';
+import 'package:communehub/user/signup.dart';
+
+import 'package:communehub/user/userhome.dart';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -23,9 +29,10 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       initialRoute: "/",
       routes: {
-        '/': (context) => LoginScreen(),
+        '/': (context) => OnboardingView(),
         '/signup': (context) => SignUpScreen(),
-        '/home': (context) => HomePage()
+        '/home': (context) => HomePage(),
+        '/communityhome': (context) => communityHome()
       },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
