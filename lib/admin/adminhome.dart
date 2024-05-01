@@ -1,7 +1,8 @@
+import 'package:communehub/competitions/adminlisting.dart';
 import 'package:communehub/events/adminlisting.dart';
 import 'package:flutter/material.dart';
 import 'package:communehub/community/CommunityPage.dart';
-import 'package:communehub/competitions/CompetitionsPage.dart';
+import 'package:communehub/competitions/admininput.dart';
 // Import EventDetailsPage
 import 'package:communehub/events/admininput.dart';
 import 'package:flutter/widgets.dart';

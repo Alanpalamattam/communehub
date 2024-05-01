@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:communehub/user/forgotpass.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -19,6 +18,8 @@ class _LoginScreenState extends State<LoginScreen>
   TextEditingController _emailcontroller = TextEditingController();
   TextEditingController _passcontroller = TextEditingController();
   final _loginKey = GlobalKey<FormState>();
+  bool _isObscure = true;
+
   @override
   void initState() {
     super.initState();
@@ -61,7 +62,6 @@ class _LoginScreenState extends State<LoginScreen>
                         Image.asset(
                           'assets/logo.png',
                           height: MediaQuery.of(context).size.height * 0.1,
-                          // Adjust the width of the image as needed
                         ),
                         const SizedBox(height: 10),
                         Text(
@@ -99,8 +99,7 @@ class _LoginScreenState extends State<LoginScreen>
                               color: Colors.black.withOpacity(0.2),
                               spreadRadius: 3,
                               blurRadius: 7,
-                              offset:
-                                  Offset(0, 3), // changes position of shadow
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
@@ -137,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen>
                               SizedBox(height: 10),
                               TextFormField(
                                 controller: _passcontroller,
-                                obscureText: true,
+                                obscureText: _isObscure,
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     return "Password is mandatory";
@@ -149,9 +148,18 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
                                   hintText: 'Enter Password',
                                   labelText: 'Password',
-                                  suffixIcon: Icon(
-                                    Icons.visibility_off,
-                                    color: Colors.grey,
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _isObscure
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      color: Colors.grey,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _isObscure = !_isObscure;
+                                      });
+                                    },
                                   ),
                                 ),
                               ),
@@ -160,7 +168,12 @@ class _LoginScreenState extends State<LoginScreen>
                                 alignment: Alignment.centerRight,
                                 child: TextButton(
                                   onPressed: () {
-                                    // Handle the click event for "Forgot Password?"
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              ForgotPassword()),
+                                    );
                                   },
                                   child: Text(
                                     'Forgot Password?',
@@ -191,16 +204,23 @@ class _LoginScreenState extends State<LoginScreen>
                                 child: TextButton(
                                   onPressed: () async {
                                     if (_loginKey.currentState!.validate()) {
-                                      UserCredential userdata =
-                                          await FirebaseAuth.instance
-                                              .signInWithEmailAndPassword(
-                                                  email: _emailcontroller.text
-                                                      .trim(),
-                                                  password: _passcontroller.text
-                                                      .trim());
-                                      if (userdata != null) {
+                                      try {
+                                        UserCredential userData =
+                                            await FirebaseAuth.instance
+                                                .signInWithEmailAndPassword(
+                                          email: _emailcontroller.text.trim(),
+                                          password: _passcontroller.text.trim(),
+                                        );
+                                        // if (userData != null) {
                                         Navigator.pushNamedAndRemoveUntil(
                                             context, "/home", (route) => false);
+                                        // }
+                                      } on FirebaseAuthException catch (e) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                          content: Text(e.message ?? ''),
+                                          duration: Duration(seconds: 3),
+                                        ));
                                       }
                                     }
                                   },
@@ -241,30 +261,30 @@ class _LoginScreenState extends State<LoginScreen>
                                   ],
                                 ),
                               ),
-                              SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      // Handlick event for the first Google logo button
-                                    },
-                                    child: Container(
-                                      height: 30,
-                                      width: 30,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Image.asset(
-                                        'assets/google.png',
-                                        height: 10,
-                                        width: 10,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              // SizedBox(height: 10),
+                              // Row(
+                              //   mainAxisAlignment: MainAxisAlignment.center,
+                              //   children: [
+                              //     GestureDetector(
+                              //       onTap: () {
+                              //         // Handlick event for the first Google logo button
+                              //       },
+                              //       child: Container(
+                              //         height: 30,
+                              //         width: 30,
+                              //         decoration: BoxDecoration(
+                              //           color: Colors.white,
+                              //           borderRadius: BorderRadius.circular(10),
+                              //         ),
+                              //         child: Image.asset(
+                              //           'assets/google.png',
+                              //           height: 10,
+                              //           width: 10,
+                              //         ),
+                              //       ),
+                              //     ),
+                              //   ],
+                              // ),
                             ],
                           ),
                         ),

@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// Importing a placeholder login screen
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -19,12 +17,17 @@ class _SignUpScreenState extends State<SignUpScreen>
   TextEditingController namecontroller = TextEditingController();
   TextEditingController _emailcontroller = TextEditingController();
   TextEditingController _passcontroller = TextEditingController();
+  TextEditingController _confirmPassController = TextEditingController();
   TextEditingController dobController = TextEditingController();
   String? genderValue;
   TextEditingController rollNoController = TextEditingController();
   TextEditingController departmentController = TextEditingController();
   TextEditingController semesterController = TextEditingController();
-  final _Signupkey = GlobalKey<FormState>();
+  final _signupKey = GlobalKey<FormState>();
+
+  bool _loading = false;
+  double _progress = 0.0;
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +50,7 @@ class _SignUpScreenState extends State<SignUpScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           AnimatedBackground(animation: _animation),
@@ -78,10 +82,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 30),
-                  Form(
-                    key: _Signupkey,
-                    child: Expanded(
+                  const SizedBox(height: 40),
+                  Expanded(
+                    child: SingleChildScrollView(
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.only(
@@ -90,10 +93,11 @@ class _SignUpScreenState extends State<SignUpScreen>
                           ),
                           color: Colors.white,
                         ),
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: MediaQuery.of(context).size.width * 0.1,
-                          ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.1,
+                        ),
+                        child: Form(
+                          key: _signupKey,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -101,21 +105,22 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 'We need some bio info',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 22,
+                                  fontSize: 24,
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(height: 10),
+                              SizedBox(height: 20),
                               TextFormField(
                                 controller: namecontroller,
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     return "Enter Name";
                                   }
+                                  return null;
                                 },
                                 decoration: InputDecoration(
-                                  suffixIcon: Icon(
-                                    Icons.check,
+                                  prefixIcon: Icon(
+                                    Icons.person,
                                     color: Colors.grey,
                                   ),
                                   hintText: 'Enter Name',
@@ -131,17 +136,23 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   fillColor: Colors.white,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              SizedBox(height: 10),
                               TextFormField(
                                 controller: _emailcontroller,
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     return "Enter an Email id";
                                   }
+                                  if (!RegExp(
+                                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                      .hasMatch(value)) {
+                                    return "Enter valid email";
+                                  }
+                                  return null;
                                 },
                                 decoration: InputDecoration(
-                                  suffixIcon: Icon(
-                                    Icons.check,
+                                  prefixIcon: Icon(
+                                    Icons.email,
                                     color: Colors.grey,
                                   ),
                                   labelText: 'Phone or Gmail',
@@ -156,18 +167,19 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   fillColor: Colors.white,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              SizedBox(height: 10),
                               TextFormField(
                                 controller: _passcontroller,
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     return "Password is mandatory";
                                   }
+                                  return null;
                                 },
                                 obscureText: true,
                                 decoration: InputDecoration(
-                                  suffixIcon: Icon(
-                                    Icons.visibility_off,
+                                  prefixIcon: Icon(
+                                    Icons.lock,
                                     color: Colors.grey,
                                   ),
                                   labelText: 'Password',
@@ -182,7 +194,37 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   fillColor: Colors.white,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              SizedBox(height: 10),
+                              TextFormField(
+                                controller: _confirmPassController,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "Confirm Password is mandatory";
+                                  }
+                                  if (value != _passcontroller.text) {
+                                    return "Passwords do not match";
+                                  }
+                                  return null;
+                                },
+                                obscureText: true,
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.lock,
+                                    color: Colors.grey,
+                                  ),
+                                  labelText: 'Confirm Password',
+                                  labelStyle: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                ),
+                              ),
+                              SizedBox(height: 10),
                               TextFormField(
                                 readOnly: true,
                                 controller: dobController,
@@ -190,6 +232,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   if (value!.isEmpty) {
                                     return "Enter DOB";
                                   }
+                                  return null;
                                 },
                                 onTap: () async {
                                   final DateTime? pickedDate =
@@ -206,7 +249,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     });
                                 },
                                 decoration: InputDecoration(
-                                  suffixIcon: Icon(
+                                  prefixIcon: Icon(
                                     Icons.calendar_today,
                                     color: Colors.grey,
                                   ),
@@ -222,7 +265,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   fillColor: Colors.white,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              SizedBox(height: 10),
                               DropdownButtonFormField<String>(
                                 value: genderValue,
                                 onChanged: (String? newValue) {
@@ -257,17 +300,18 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   );
                                 }).toList(),
                               ),
-                              SizedBox(height: 5),
+                              SizedBox(height: 10),
                               TextFormField(
                                 controller: rollNoController,
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     return "Enter Roll Number";
                                   }
+                                  return null;
                                 },
                                 decoration: InputDecoration(
-                                  suffixIcon: Icon(
-                                    Icons.check,
+                                  prefixIcon: Icon(
+                                    Icons.numbers,
                                     color: Colors.grey,
                                   ),
                                   hintText: 'Enter Roll Number',
@@ -283,16 +327,17 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   fillColor: Colors.white,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              SizedBox(height: 10),
                               TextFormField(
                                 controller: departmentController,
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     return "Enter Department";
                                   }
+                                  return null;
                                 },
                                 decoration: InputDecoration(
-                                  suffixIcon: Icon(
+                                  prefixIcon: Icon(
                                     Icons.check,
                                     color: Colors.grey,
                                   ),
@@ -309,16 +354,17 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   fillColor: Colors.white,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              SizedBox(height: 10),
                               TextFormField(
                                 controller: semesterController,
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     return "Enter Semester";
                                   }
+                                  return null;
                                 },
                                 decoration: InputDecoration(
-                                  suffixIcon: Icon(
+                                  prefixIcon: Icon(
                                     Icons.check,
                                     color: Colors.grey,
                                   ),
@@ -335,7 +381,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   fillColor: Colors.white,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              SizedBox(height: 10),
                               Container(
                                 height: 55,
                                 width: 200, // Reduced width
@@ -346,104 +392,126 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     Color(0xff281537),
                                   ]),
                                 ),
-                                child: TextButton(
-                                  onPressed: () async {
-                                    if (_Signupkey.currentState!.validate()) {
-                                      // Check if the email is already in use
-                                      try {
-                                        // Inside the try block after creating the user
-                                        UserCredential userData =
-                                            await FirebaseAuth.instance
-                                                .createUserWithEmailAndPassword(
-                                          email: _emailcontroller.text.trim(),
-                                          password: _passcontroller.text.trim(),
-                                        );
-
-                                        if (userData != null) {
-                                          // Set the user's display name
-                                          await userData.user!.updateProfile(
-                                              displayName: namecontroller.text);
-
-                                          // User creation successful
-                                          await FirebaseFirestore.instance
-                                              .collection('users')
-                                              .doc(userData.user!.uid)
-                                              .set({
-                                            'uid': userData.user!.uid,
-                                            'email': userData.user!.email,
-                                            'name': namecontroller.text,
-                                            'dob': dobController.text,
-                                            'gender': genderValue ?? '',
-                                            'createdAt': DateTime.now(),
-                                            'status': 1,
-                                            'roll_number':
-                                                rollNoController.text,
-                                            'department':
-                                                departmentController.text,
-                                            'semester': semesterController.text,
-                                          }).then((value) {
-                                            // Navigate to home screen
-                                            Navigator.pushNamedAndRemoveUntil(
-                                                context,
-                                                '/home',
-                                                (route) => false);
+                                child: _loading
+                                    ? LinearProgressIndicator(
+                                        value: _progress,
+                                        backgroundColor: Colors.grey[300],
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
+                                      )
+                                    : TextButton(
+                                        onPressed: () async {
+                                          setState(() {
+                                            _loading = true;
                                           });
-                                        }
-                                      } on FirebaseAuthException catch (e) {
-                                        if (e.code == 'weak-password') {
-                                          // Password is too weak
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                  'The password provided is too weak.'),
-                                              duration: Duration(seconds: 3),
-                                            ),
-                                          );
-                                        } else if (e.code ==
-                                            'email-already-in-use') {
-                                          // Email is already in use
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                  'The account already exists for that email.'),
-                                              duration: Duration(seconds: 3),
-                                            ),
-                                          );
-                                        }
-                                      } catch (e) {
-                                        // Other errors
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                                'An error occurred while signing up.'),
-                                            duration: Duration(seconds: 3),
+                                          if (_signupKey.currentState!
+                                              .validate()) {
+                                            // Check if the email is already in use
+                                            try {
+                                              // Inside the try block after creating the user
+                                              UserCredential userData =
+                                                  await FirebaseAuth.instance
+                                                      .createUserWithEmailAndPassword(
+                                                email: _emailcontroller.text
+                                                    .trim(),
+                                                password:
+                                                    _passcontroller.text.trim(),
+                                              );
+
+                                              if (userData != null) {
+                                                // Set the user's display name
+                                                await userData.user!
+                                                    .updateProfile(
+                                                        displayName:
+                                                            namecontroller
+                                                                .text);
+
+                                                // User creation successful
+                                                await FirebaseFirestore.instance
+                                                    .collection('users')
+                                                    .doc(userData.user!.uid)
+                                                    .set({
+                                                  'uid': userData.user!.uid,
+                                                  'email': userData.user!.email,
+                                                  'name': namecontroller.text,
+                                                  'dob': dobController.text,
+                                                  'gender': genderValue ?? '',
+                                                  'createdAt': DateTime.now(),
+                                                  'status': 1,
+                                                  'roll_number':
+                                                      rollNoController.text,
+                                                  'department':
+                                                      departmentController.text,
+                                                  'semester':
+                                                      semesterController.text,
+                                                }).then((value) {
+                                                  // Navigate to home screen
+                                                  Navigator
+                                                      .pushNamedAndRemoveUntil(
+                                                          context,
+                                                          '/home',
+                                                          (route) => false);
+                                                });
+                                              }
+                                            } on FirebaseAuthException catch (e) {
+                                              if (e.code == 'weak-password') {
+                                                // Password is too weak
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                        'The password provided is too weak.'),
+                                                    duration:
+                                                        Duration(seconds: 3),
+                                                  ),
+                                                );
+                                              } else if (e.code ==
+                                                  'email-already-in-use') {
+                                                // Email is already in use
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                        'The account already exists for that email.'),
+                                                    duration:
+                                                        Duration(seconds: 3),
+                                                  ),
+                                                );
+                                              }
+                                            } catch (e) {
+                                              // Other errors
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                      'An error occurred while signing up.'),
+                                                  duration:
+                                                      Duration(seconds: 3),
+                                                ),
+                                              );
+                                            }
+                                          } else {
+                                            // Show a Snackbar if any field is not entered
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                    'Please fill in all the fields.'),
+                                                duration: Duration(seconds: 3),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        child: Text(
+                                          'SIGN UP',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                            color: Colors.white,
                                           ),
-                                        );
-                                      }
-                                    } else {
-                                      // Show a Snackbar if any field is not entered
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                              'Please fill in all the fields.'),
-                                          duration: Duration(seconds: 3),
                                         ),
-                                      );
-                                    }
-                                  },
-                                  child: Text(
-                                    'SIGN UP',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
+                                      ),
                               ),
                             ],
                           ),

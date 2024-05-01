@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:communehub/community/communityhome.dart';
+import 'package:communehub/competitions/competitionscreen.dart';
 import 'package:communehub/events/eventscreen.dart';
 import 'package:communehub/user/loginscreen.dart';
 import 'package:communehub/user/userprofile.dart';
@@ -12,12 +14,13 @@ class Event {
   final String timings;
   final String description;
   final String imageUrl;
-
+  final String modeOfConduct;
   Event({
     required this.name,
     required this.timings,
     required this.description,
     required this.imageUrl,
+    required this.modeOfConduct,
   });
 }
 
@@ -65,6 +68,7 @@ class _HomePageState extends State<HomePage> {
           timings: doc['date'],
           description: doc['description'],
           imageUrl: doc['imageUrl'],
+          modeOfConduct: doc['modeOfConduct'],
         );
       }).toList();
     });
@@ -101,13 +105,17 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            Spacer(), // Add Spacer to push the profile picture to the right
-
-            SizedBox(width: 16), SizedBox(height: 10),
+            Spacer(),
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Icon(Icons.notifications_none),
+            ),
+            SizedBox(height: 10),
           ],
         ),
         automaticallyImplyLeading: false, // Remove back arrow
       ),
+
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -181,7 +189,12 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               IconButton(
-                onPressed: () => setState(() => _pressedButtonIndex = 1),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => EventsPage()),
+                  );
+                },
                 icon: AnimatedContainer(
                   duration: Duration(milliseconds: 200),
                   decoration: BoxDecoration(
@@ -203,7 +216,12 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               IconButton(
-                onPressed: () => setState(() => _pressedButtonIndex = 2),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CompdisplayPage()),
+                  );
+                },
                 icon: AnimatedContainer(
                   duration: Duration(milliseconds: 200),
                   decoration: BoxDecoration(
@@ -242,7 +260,10 @@ class _HomePageState extends State<HomePage> {
                 ),
                 TextButton(
                   onPressed: () {
-                    // Add functionality for "See All"
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => EventsPage()),
+                    );
                   },
                   child: Text(
                     'See All',
@@ -323,6 +344,11 @@ class _HomePageState extends State<HomePage> {
                                 style: TextStyle(fontSize: 16),
                               ),
                               SizedBox(height: 8),
+                              Text(
+                                'Mode of Conduct: ${_events[index].modeOfConduct ?? "N/A"}',
+                                style: TextStyle(fontSize: 18),
+                              ),
+
                               // Text(
                               //   'Description: ${_events[index].description}',
                               //   style: TextStyle(fontSize: 16),
@@ -365,14 +391,35 @@ class _HomePageState extends State<HomePage> {
                   text: 'Home',
                 ),
                 GButton(
-                  icon: Icons.favorite_outline, // Heart outline icon
-                  text: 'Likes',
+                  onPressed: () {
+                    // Navigate to UserInputPage when floating action button is pressed
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => communityHome()),
+                    );
+                  },
+                  icon: Icons.people_alt_outlined, // Heart outline icon
+                  text: 'Community',
                 ),
                 GButton(
+                  onPressed: () {
+                    // Navigate to UserInputPage when floating action button is pressed
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => communityHome()),
+                    );
+                  },
                   icon: LineIcons.search,
                   text: 'Search',
                 ),
                 GButton(
+                  onPressed: () {
+                    // Navigate to UserInputPage when floating action button is pressed
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfileScreen()),
+                    );
+                  },
                   icon: LineIcons.user,
                   text: 'Profile',
                 ),
@@ -387,14 +434,14 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      endDrawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            // Drawer content here
-          ],
-        ),
-      ),
+      // endDrawer: Drawer(
+      //   child: ListView(
+      //     padding: EdgeInsets.zero,
+      //     children: <Widget>[
+      //       // Drawer content here
+      //     ],
+      //   ),
+      // ),
     );
   }
 }
@@ -406,9 +453,9 @@ class ImageSlider extends StatefulWidget {
 
 class _ImageSliderState extends State<ImageSlider> {
   final List<String> imagePaths = [
-    "assets/slider.jpg",
-    "assets/slider.jpg",
-    "assets/slider.jpg"
+    "assets/Slider1.png",
+    "assets/Slider2.png",
+    "assets/Slider3.png"
   ];
   int _currentIndex = 0;
 
@@ -497,20 +544,6 @@ class ExecomcallPage extends StatelessWidget {
       ),
       body: Center(
         child: Text('Execomcall Page'),
-      ),
-    );
-  }
-}
-
-class CompetitionsPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Competitions'),
-      ),
-      body: Center(
-        child: Text('Competitions Page'),
       ),
     );
   }
