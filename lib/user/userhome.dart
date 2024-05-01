@@ -1,18 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:communehub/events/eventscreen.dart';
-
 import 'package:communehub/user/loginscreen.dart';
 import 'package:communehub/user/userprofile.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:line_icons/line_icons.dart';
 
 class Event {
   final String name;
   final String timings;
   final String description;
   final String imageUrl;
-  // New field for event image URL
 
   Event({
     required this.name,
@@ -28,9 +27,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int _pressedButtonIndex = 0;
   String _userName = '';
   String _userEmail = '';
   List<Event> _events = [];
+
   @override
   void initState() {
     super.initState();
@@ -60,41 +61,22 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _events = eventSnapshot.docs.map((doc) {
         return Event(
-          name: doc['name'],
+          name: doc['nameOfEvent'],
           timings: doc['date'],
           description: doc['description'],
-          imageUrl: doc['image_url'],
+          imageUrl: doc['imageUrl'],
         );
       }).toList();
     });
   }
 
+  int _selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
-    // Mock list of events (replace with actual data)
-    // List<Event> events = [
-    //   Event(
-    //     name: 'Event 1',
-    //     timings: '10:00 AM - 12:00 PM',
-    //     description: 'Description for Event 1',
-    //     imageUrl: 'assets/event1.jpg',
-    //   ),
-    //   Event(
-    //     name: 'Event 2',
-    //     timings: '1:00 PM - 3:00 PM',
-    //     description: 'Description for Event 2',
-    //     imageUrl: 'assets/event1.jpg',
-    //   ),
-    //   Event(
-    //     name: 'Event 3',
-    //     timings: '4:00 PM - 6:00 PM',
-    //     description: 'Description for Event 3',
-    //     imageUrl: 'assets/event1.jpg',
-    //   ),
-    // ];
-
     return Scaffold(
       appBar: AppBar(
+        // backgroundColor: Color(0xFFB760D5),
         title: Row(
           children: [
             Padding(
@@ -121,7 +103,7 @@ class _HomePageState extends State<HomePage> {
             ),
             Spacer(), // Add Spacer to push the profile picture to the right
 
-            SizedBox(width: 16),
+            SizedBox(width: 16), SizedBox(height: 10),
           ],
         ),
         automaticallyImplyLeading: false, // Remove back arrow
@@ -171,59 +153,80 @@ class _HomePageState extends State<HomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
+              IconButton(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => EventsPage()),
                   );
                 },
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Color(0xFF1A1A1A)),
-                ),
-                child: Text(
-                  'Events',
-                  style:
-                      TextStyle(color: Colors.white), // Set text color to white
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ExecomcallPage()),
-                  );
-                },
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Color(0xFF1A1A1A)),
-                ),
-                child: Text(
-                  'Execomcall',
-                  style:
-                      TextStyle(color: Colors.white), // Set text color to white
+                icon: AnimatedContainer(
+                  duration: Duration(milliseconds: 200),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(20),
+                    color: _pressedButtonIndex == 0 ? Color(0xFFB760D5) : null,
+                  ),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 22.0, vertical: 8.0),
+                  child: Text(
+                    '   Events   ',
+                    style: TextStyle(
+                      color: _pressedButtonIndex == 0
+                          ? Colors.white
+                          : Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => CompetitionsPage()),
-                  );
-                },
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Color(0xFF1A1A1A)),
+              IconButton(
+                onPressed: () => setState(() => _pressedButtonIndex = 1),
+                icon: AnimatedContainer(
+                  duration: Duration(milliseconds: 200),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(20),
+                    color: _pressedButtonIndex == 1 ? Color(0xFFB760D5) : null,
+                  ),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+                  child: Text(
+                    'Execom Call',
+                    style: TextStyle(
+                      color: _pressedButtonIndex == 1
+                          ? Colors.white
+                          : Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-                child: Text(
-                  'Competitions',
-                  style:
-                      TextStyle(color: Colors.white), // Set text color to white
+              ),
+              IconButton(
+                onPressed: () => setState(() => _pressedButtonIndex = 2),
+                icon: AnimatedContainer(
+                  duration: Duration(milliseconds: 200),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(20),
+                    color: _pressedButtonIndex == 2 ? Color(0xFFB760D5) : null,
+                  ),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+                  child: Text(
+                    'Competitions',
+                    style: TextStyle(
+                      color: _pressedButtonIndex == 2
+                          ? Colors.white
+                          : Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
+
           SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -244,7 +247,7 @@ class _HomePageState extends State<HomePage> {
                   child: Text(
                     'See All',
                     style: TextStyle(
-                      color: Colors.blue,
+                      color: Color(0xFFB760D5),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -316,14 +319,14 @@ class _HomePageState extends State<HomePage> {
                               ),
                               SizedBox(height: 8),
                               Text(
-                                'Date: ${_events[index].timings}', // Correct field name
+                                '${_events[index].timings}', // Correct field name
                                 style: TextStyle(fontSize: 16),
                               ),
                               SizedBox(height: 8),
-                              Text(
-                                'Description: ${_events[index].description}',
-                                style: TextStyle(fontSize: 16),
-                              ),
+                              // Text(
+                              //   'Description: ${_events[index].description}',
+                              //   style: TextStyle(fontSize: 16),
+                              // ),
                             ],
                           ),
                         ),
@@ -336,135 +339,59 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              icon: Icon(Icons.home),
-              onPressed: () {
-                // Add functionality for home button
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.event),
-              onPressed: () {
-                Navigator.pushNamed(context, '/communityhome');
-                // Add functionality for event button
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.person),
-              onPressed: () {
-                // Add functionality for profile button
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.settings),
-              onPressed: () {
-                // Add functionality for settings button
-              },
-            ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 20,
+              color: Colors.black.withOpacity(.1),
+            )
           ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            child: GNav(
+              gap: 8,
+              activeColor: Colors.white,
+              iconSize: 24,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              duration: Duration(milliseconds: 900),
+              tabBackgroundColor: Color(0xFFB760D5),
+              tabs: [
+                GButton(
+                  icon: LineIcons.home,
+                  text: 'Home',
+                ),
+                GButton(
+                  icon: Icons.favorite_outline, // Heart outline icon
+                  text: 'Likes',
+                ),
+                GButton(
+                  icon: LineIcons.search,
+                  text: 'Search',
+                ),
+                GButton(
+                  icon: LineIcons.user,
+                  text: 'Profile',
+                ),
+              ],
+              selectedIndex: _selectedIndex,
+              onTabChange: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+            ),
+          ),
         ),
       ),
       endDrawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Color.fromARGB(255, 65, 129, 166),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundImage: AssetImage('assets/profile.jpg'),
-                      ),
-                      SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _userName,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                            ),
-                          ),
-                          Text(
-                            _userEmail,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Divider(
-                    color: Colors.white,
-                    thickness: 2,
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              title: Text('Profile'),
-              onTap: () {
-                // Navigate to UserInputPage when floating action button is pressed
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => UserProfilePage()),
-                );
-              },
-            ),
-            ListTile(
-              title: Text('Item 2'),
-              onTap: () {
-                // Add functionality for drawer item 2
-              },
-            ),
-            ListTile(
-              title: Text('Item 2'),
-              onTap: () {
-                // Add functionality for drawer item 2
-              },
-            ),
-            ListTile(
-              title: Text('Item 2'),
-              onTap: () {
-                // Add functionality for drawer item 2
-              },
-            ),
-            ListTile(
-              title: Text('Item 2'),
-              onTap: () {
-                // Add functionality for drawer item 2
-              },
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            ListTile(
-              title: Text('Logout'),
-              leading: Icon(Icons.logout),
-              onTap: () {
-                FirebaseAuth.instance.signOut().then((value) =>
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()),
-                        (route) => false));
-                final user = FirebaseAuth.instance.currentUser;
-                print(user!.email);
-              },
-            ),
+            // Drawer content here
           ],
         ),
       ),

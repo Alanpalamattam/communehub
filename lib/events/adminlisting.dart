@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:communehub/events/userinputpage.dart'; // Import UserInputPage
+import 'package:communehub/events/admininput.dart'; // Import UserInputPage
 
-class EventDetailsPage extends StatelessWidget {
+class EventlistPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,12 +50,12 @@ class EventDetailsPage extends StatelessWidget {
                       // borderRadius: BorderRadius.circular(
                       //     5.0), // Set circular border radius
                       child: Image.network(
-                        event['image_url'],
+                        event['imageUrl'],
                         fit: BoxFit.fill,
                       ),
                     ),
                     title: Text(
-                      '${event['name']}',
+                      '${event['nameOfEvent']}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 25, // Adjust the font size as needed

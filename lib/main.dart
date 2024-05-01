@@ -1,5 +1,7 @@
 import 'package:communehub/community/communityhome.dart';
-import 'package:communehub/events/eventdetails.dart';
+import 'package:communehub/events/admininput.dart';
+import 'package:communehub/events/adminlisting.dart';
+import 'package:communehub/events/eventscreen.dart';
 import 'package:communehub/firebase_options.dart';
 
 import 'package:communehub/onboarding/onboarding.dart';

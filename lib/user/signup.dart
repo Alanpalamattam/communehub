@@ -351,6 +351,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     if (_Signupkey.currentState!.validate()) {
                                       // Check if the email is already in use
                                       try {
+                                        // Inside the try block after creating the user
                                         UserCredential userData =
                                             await FirebaseAuth.instance
                                                 .createUserWithEmailAndPassword(
@@ -359,6 +360,10 @@ class _SignUpScreenState extends State<SignUpScreen>
                                         );
 
                                         if (userData != null) {
+                                          // Set the user's display name
+                                          await userData.user!.updateProfile(
+                                              displayName: namecontroller.text);
+
                                           // User creation successful
                                           await FirebaseFirestore.instance
                                               .collection('users')

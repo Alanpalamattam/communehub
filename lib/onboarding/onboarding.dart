@@ -19,9 +19,9 @@ class _OnboardingViewState extends State<OnboardingView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE7E0C9),
+      backgroundColor: Color(0xFFECECEC),
       bottomSheet: Container(
-        color: Color(0xFFE7E0C9),
+        color: Color(0xFFECECEC),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         child: isLastPage
             ? getStarted()

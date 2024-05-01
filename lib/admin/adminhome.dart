@@ -1,8 +1,9 @@
+import 'package:communehub/events/adminlisting.dart';
 import 'package:flutter/material.dart';
 import 'package:communehub/community/CommunityPage.dart';
 import 'package:communehub/competitions/CompetitionsPage.dart';
-import 'package:communehub/events/eventdetails.dart'; // Import EventDetailsPage
-import 'package:communehub/events/userinputpage.dart';
+// Import EventDetailsPage
+import 'package:communehub/events/admininput.dart';
 import 'package:flutter/widgets.dart';
 
 class Adminpage extends StatelessWidget {
@@ -57,7 +58,7 @@ class Adminpage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => EventDetailsPage(),
+                                builder: (context) => EventlistPage(),
                               ),
                             );
                           },
