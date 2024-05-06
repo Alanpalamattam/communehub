@@ -147,7 +147,7 @@ class _HomePageState extends State<HomePage> {
                   Expanded(
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: 'Search',
+                        hintText: 'Search here',
                         border: InputBorder.none,
                       ),
                     ),
@@ -420,8 +420,8 @@ class _HomePageState extends State<HomePage> {
                       MaterialPageRoute(builder: (context) => CalendarApp()),
                     );
                   },
-                  icon: LineIcons.search,
-                  text: 'Search',
+                  icon: LineIcons.calendar,
+                  text: 'Calendar',
                 ),
                 GButton(
                   onPressed: () {

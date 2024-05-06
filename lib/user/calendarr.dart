@@ -10,6 +10,7 @@ class CalendarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: CalendarPage(),
     );
   }
@@ -29,7 +30,7 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Calendar Page'),
+        title: Text('Calendar '),
       ),
       body: Column(
         children: [

@@ -7,7 +7,7 @@ class UserNotificationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notifications (User)'),
+        title: Text('Notifications'),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream:
