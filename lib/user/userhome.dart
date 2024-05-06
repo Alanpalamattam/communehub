@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:communehub/community/communityhome.dart';
 import 'package:communehub/competitions/competitionscreen.dart';
 import 'package:communehub/events/eventscreen.dart';
+import 'package:communehub/user/calendarr.dart';
 import 'package:communehub/user/loginscreen.dart';
+import 'package:communehub/user/notifications.dart';
 import 'package:communehub/user/userprofile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -106,9 +108,18 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             Spacer(),
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: Icon(Icons.notifications_none),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => UserNotificationPage()),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: Icon(Icons.notifications_none),
+              ),
             ),
             SizedBox(height: 10),
           ],
@@ -345,7 +356,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               SizedBox(height: 8),
                               Text(
-                                'Mode of Conduct: ${_events[index].modeOfConduct ?? "N/A"}',
+                                '${_events[index].modeOfConduct ?? "N/A"}',
                                 style: TextStyle(fontSize: 18),
                               ),
 
@@ -406,7 +417,7 @@ class _HomePageState extends State<HomePage> {
                     // Navigate to UserInputPage when floating action button is pressed
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => communityHome()),
+                      MaterialPageRoute(builder: (context) => CalendarApp()),
                     );
                   },
                   icon: LineIcons.search,

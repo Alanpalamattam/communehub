@@ -1,9 +1,14 @@
 import 'package:communehub/events/ticketpage.dart';
+import 'package:communehub/user/userhome.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EventsPage extends StatelessWidget {
+  // final Event event; // Change the type to Event
+
+  // EventDetailsPage({required this.event}); // Modify the constructor
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -267,15 +272,21 @@ class EventDetailsPage extends StatelessWidget {
               await FirebaseFirestore.instance
                   .collection('registrations')
                   .doc(event['name'])
-                  .collection('users')
-                  .doc(currentUser.uid)
-                  .set({
-                'userName': userName,
-                'userEmail': userEmail,
-                'eventDate': event['date'],
-                'eventName': event['name'],
-                // Add more fields as needed
-              });
+                  .set(
+                      {
+                    'eventName': event['name'],
+                    'eventDate': event['date'],
+                    'registrants': FieldValue.arrayUnion([
+                      {
+                        'userName': userName,
+                        'userEmail': userEmail,
+                      }
+                    ]),
+                    // Add more fields as needed
+                  },
+                      SetOptions(
+                          merge:
+                              true)); // Use merge option to merge instead of overwrite
 
               // Navigate to registration complete page
               Navigator.push(
@@ -367,15 +378,15 @@ class RegistrationCompletePage extends StatelessWidget {
             // View Ticket button
             ElevatedButton(
               onPressed: () {
-                // Navigator.push(
-                //     context, MaterialPageRoute(builder: (_) => TicketData()));
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => HomePage()));
                 // Add functionality to view ticket
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFB760D5),
               ),
               child: Text(
-                'View Ticket',
+                'Done',
                 style: TextStyle(
                   color: Colors.white,
                 ),

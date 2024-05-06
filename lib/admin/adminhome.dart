@@ -1,7 +1,10 @@
+import 'package:communehub/admin/adminnotification.dart';
+import 'package:communehub/admin/registrants.dart';
 import 'package:communehub/competitions/adminlisting.dart';
 import 'package:communehub/events/adminlisting.dart';
+import 'package:communehub/onboarding/useroradmin.dart';
 import 'package:flutter/material.dart';
-import 'package:communehub/community/CommunityPage.dart';
+
 import 'package:communehub/competitions/admininput.dart';
 // Import EventDetailsPage
 import 'package:communehub/events/admininput.dart';
@@ -111,7 +114,7 @@ class Adminpage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => CommunityPage(),
+                                builder: (context) => RegistrationsPage(),
                               ),
                             );
                           },
@@ -137,7 +140,7 @@ class Adminpage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => CommunityPage(),
+                                builder: (context) => RegistrationsPage(),
                               ),
                             );
                           },
@@ -146,7 +149,33 @@ class Adminpage extends StatelessWidget {
                                 const Color.fromARGB(255, 17, 17, 18)),
                           ),
                           child: Text(
-                            'Community',
+                            'Registrants',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      SizedBox(
+                        width: 280,
+                        height: 50,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AdminNotificationPage(),
+                              ),
+                            );
+                          },
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(
+                                const Color.fromARGB(255, 17, 17, 18)),
+                          ),
+                          child: Text(
+                            'Add Notifications',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.white,
@@ -161,6 +190,17 @@ class Adminpage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LoginSelectionScreen(),
+            ),
+          );
+        },
+        child: Icon(Icons.logout),
       ),
     );
   }

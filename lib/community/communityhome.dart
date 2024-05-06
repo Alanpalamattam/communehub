@@ -17,7 +17,7 @@ class _communityHome extends State<communityHome> {
     'IEEE': 'assets/ieeeb.png',
     'TINKER HUB': 'assets/TINKERHUB.png',
     'UI PATH': 'assets/UIPATH.png',
-    'CSI': 'assets/csilo.png',
+    'Mulearn': 'assets/csilo.png',
     // Add more community logos as needed
   };
 

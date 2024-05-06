@@ -88,7 +88,13 @@ class CompetitionsPage extends StatelessWidget {
                               ),
                               SizedBox(height: 4.0),
                               Text(
-                                '${comp['description']}',
+                                '${comp['nameOfCommunity']}',
+                                style: TextStyle(fontSize: 14),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                '${comp['modeOfConduct']}',
                                 style: TextStyle(fontSize: 14),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,

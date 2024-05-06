@@ -1,3 +1,5 @@
+import 'package:communehub/user/userhome.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -257,10 +259,58 @@ class CompetitionDetailsPage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: Positioned(
-        bottom: 0,
-        left: 0,
-        right: 0,
+      bottomNavigationBar: GestureDetector(
+        onTap: () async {
+          try {
+            final currentUser = FirebaseAuth.instance.currentUser;
+            if (currentUser != null) {
+              final userEmail = currentUser.email;
+              final userName = currentUser.displayName;
+
+              // Add registration to Firestore
+              await FirebaseFirestore.instance
+                  .collection('registrations')
+                  .doc(comp['name'])
+                  .set(
+                      {
+                    'eventName': comp['name'],
+                    'eventDate': comp['date'],
+                    'registrants': FieldValue.arrayUnion([
+                      {
+                        'userName': userName,
+                        'userEmail': userEmail,
+                      }
+                    ]),
+                    // Add more fields as needed
+                  },
+                      SetOptions(
+                          merge:
+                              true)); // Use merge option to merge instead of overwrite
+
+              // Navigate to registration complete page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CompRegistrationCompletePage(),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('User not logged in'),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            }
+          } catch (error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error: $error'),
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+        },
         child: Container(
           color: Color(0xFF7E53D6),
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -270,11 +320,72 @@ class CompetitionDetailsPage extends StatelessWidget {
               Icon(Icons.event),
               SizedBox(width: 10),
               Text(
-                'Register competition',
+                'Register Event',
                 style: TextStyle(fontSize: 18),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class CompRegistrationCompletePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFFECECEC),
+      appBar: AppBar(
+        backgroundColor: Color(0xFFECECEC),
+
+        // backgroundColor: Color(0xFFB760D5),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Animated tick GIF
+            Image.asset(
+              'assets/tick1.gif',
+              height: 200,
+              width: 300,
+            ),
+            SizedBox(height: 20),
+            // Registration complete message with animation
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 24.0),
+              duration: Duration(seconds: 1),
+              builder: (context, value, child) {
+                return Text(
+                  'Registration Complete!',
+                  style: TextStyle(
+                    fontSize: value,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFB760D5),
+                  ),
+                );
+              },
+            ),
+            SizedBox(height: 20),
+            // View Ticket button
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => HomePage()));
+                // Add functionality to view ticket
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFB760D5),
+              ),
+              child: Text(
+                'Done',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

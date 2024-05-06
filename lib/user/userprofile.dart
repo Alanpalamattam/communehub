@@ -1,6 +1,10 @@
+import 'package:communehub/onboarding/useroradmin.dart';
 import 'package:communehub/user/loginscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -98,6 +102,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               leading: Icon(Icons.event_sharp),
               title: Text('Registered Events'),
               onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          CheckRegisteredEventsAndCompetitionsPage()),
+                );
+
                 // Handle registered events tap
               },
             ),
@@ -126,13 +137,107 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onTap: () {
                 FirebaseAuth.instance.signOut(); // Sign out the user
                 // Navigate to the login page
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => LoginSelectionScreen()));
               },
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class CheckRegisteredEventsAndCompetitionsPage extends StatefulWidget {
+  @override
+  _CheckRegisteredEventsAndCompetitionsPageState createState() =>
+      _CheckRegisteredEventsAndCompetitionsPageState();
+}
+
+class _CheckRegisteredEventsAndCompetitionsPageState
+    extends State<CheckRegisteredEventsAndCompetitionsPage> {
+  late String _userName = '';
+  bool _loading = true;
+  bool _hasRegistered = false;
+  List<Map<String, dynamic>> _registeredEvents = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _fetchUserName();
+    _checkRegistrations();
+  }
+
+  Future<void> _fetchUserName() async {
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (userDoc.exists) {
+        setState(() {
+          _userName = userDoc['name'];
+        });
+      }
+    }
+  }
+
+  Future<void> _checkRegistrations() async {
+    try {
+      final QuerySnapshot<Map<String, dynamic>> snapshot =
+          await FirebaseFirestore.instance
+              .collection('registrations')
+              .where('registrants', arrayContains: _userName)
+              .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          _registeredEvents = snapshot.docs.map((doc) => doc.data()).toList();
+          _hasRegistered = true;
+          _loading = false;
+        });
+      } else {
+        setState(() {
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _loading = false;
+      });
+      print('Error checking registrations: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Registered Events and Competitions'),
+      ),
+      body: _loading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : _hasRegistered
+              ? ListView.builder(
+                  itemCount: _registeredEvents.length,
+                  itemBuilder: (context, index) {
+                    final event = _registeredEvents[index];
+                    return ListTile(
+                      title: Text(event['eventName']),
+                      subtitle: Text(event['eventDate']),
+                    );
+                  },
+                )
+              : Center(
+                  child: Text(
+                      'You have not registered for any events or competitions.'),
+                ),
     );
   }
 }
