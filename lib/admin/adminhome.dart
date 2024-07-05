@@ -1,6 +1,7 @@
 import 'package:communehub/admin/adminnotification.dart';
 import 'package:communehub/admin/registrants.dart';
 import 'package:communehub/competitions/adminlisting.dart';
+import 'package:communehub/competitions/artslisting.dart';
 import 'package:communehub/events/adminlisting.dart';
 import 'package:communehub/execom_call/execom_admin.dart';
 import 'package:communehub/onboarding/useroradmin.dart';
@@ -125,6 +126,32 @@ class Adminpage extends StatelessWidget {
                           ),
                           child: Text(
                             'Execom Call',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      SizedBox(
+                        width: 280,
+                        height: 50,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>CompetitionsPage2 (),
+                              ),
+                            );
+                          },
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(
+                                const Color.fromARGB(255, 17, 17, 18)),
+                          ),
+                          child: Text(
+                            'Arts',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.white,
