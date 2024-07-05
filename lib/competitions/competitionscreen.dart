@@ -114,17 +114,53 @@ class CompdisplayPage extends StatelessWidget {
   }
 }
 
-class CompetitionDetailsPage extends StatelessWidget {
+
+class CompetitionDetailsPage extends StatefulWidget {
   final Map<String, dynamic> comp;
 
   CompetitionDetailsPage({required this.comp});
+
+  @override
+  _CompetitionDetailsPageState createState() => _CompetitionDetailsPageState();
+}
+
+class _CompetitionDetailsPageState extends State<CompetitionDetailsPage> {
+  bool isRegistered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkRegistration();
+  }
+
+  void _checkRegistration() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      final userEmail = currentUser.email;
+
+      final doc = await FirebaseFirestore.instance
+          .collection('registrations')
+          .doc(widget.comp['name'])
+          .get();
+
+      if (doc.exists) {
+        final data = doc.data();
+        if (data != null) {
+          final registrants = data['registrants'] as List<dynamic>;
+          setState(() {
+            isRegistered = registrants.any((registrant) => registrant['userEmail'] == userEmail);
+          });
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          comp["name"],
+          widget.comp["name"],
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -133,19 +169,16 @@ class CompetitionDetailsPage extends StatelessWidget {
         backgroundColor: Color(0xFF7E53D6),
       ),
       body: Material(
-        // Wrap the Container with Material
-        elevation: 4, // Set elevation
-        shadowColor: Colors.black.withOpacity(0.3), // Set shadow color
-        borderRadius: BorderRadius.circular(20), // Set circular border radius
+        elevation: 4,
+        shadowColor: Colors.black.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
           margin: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Color(0xFFECECEC), // Set background color to ECECEC
-            borderRadius:
-                BorderRadius.circular(20), // Set circular border radius
+            color: Color(0xFFECECEC),
+            borderRadius: BorderRadius.circular(20),
           ),
-          constraints: BoxConstraints.expand(
-              height: double.infinity), // Set infinite height
+          constraints: BoxConstraints.expand(height: double.infinity),
           child: Padding(
             padding: EdgeInsets.all(5),
             child: SingleChildScrollView(
@@ -157,7 +190,7 @@ class CompetitionDetailsPage extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: Image.network(
-                        comp["imagePath"],
+                        widget.comp["imagePath"],
                         height: 400,
                         width: MediaQuery.of(context).size.width,
                         fit: BoxFit.fill,
@@ -179,25 +212,25 @@ class CompetitionDetailsPage extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    'Name: ${comp["name"]}',
+                                    'Name: ${widget.comp["name"]}',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 18,
                                     ),
                                   ),
                                   Text(
-                                    'Date: ${comp["date"]}',
+                                    'Date: ${widget.comp["date"]}',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 18,
                                     ),
                                   ),
                                   Text(
-                                    'Participants: ${comp["participants"]}',
+                                    'Participants: ${widget.comp["participants"]}',
                                     style: TextStyle(fontSize: 18),
                                   ),
                                   Text(
-                                    'Mode of Conduct: ${comp["conductMode"]}',
+                                    'Mode of Conduct: ${widget.comp["conductMode"]}',
                                     style: TextStyle(fontSize: 18),
                                   ),
                                 ],
@@ -230,7 +263,7 @@ class CompetitionDetailsPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Date and Time: ${comp["date"]}',
+                          'Date and Time: ${widget.comp["date"]}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 22,
@@ -238,16 +271,16 @@ class CompetitionDetailsPage extends StatelessWidget {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          '${comp["description"]}',
+                          '${widget.comp["description"]}',
                           style: TextStyle(fontSize: 18),
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'Participants: ${comp["participants"]}',
+                          'Participants: ${widget.comp["participants"]}',
                           style: TextStyle(fontSize: 18),
                         ),
                         Text(
-                          'Mode of Conduct: ${comp["conductMode"]}',
+                          'Mode of Conduct: ${widget.comp["conductMode"]}',
                           style: TextStyle(fontSize: 18),
                         ),
                       ],
@@ -260,67 +293,69 @@ class CompetitionDetailsPage extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: GestureDetector(
-        onTap: () async {
-          try {
-            final currentUser = FirebaseAuth.instance.currentUser;
-            if (currentUser != null) {
-              final userEmail = currentUser.email;
-              final userName = currentUser.displayName;
+        onTap: isRegistered
+            ? null
+            : () async {
+                try {
+                  final currentUser = FirebaseAuth.instance.currentUser;
+                  if (currentUser != null) {
+                    final userEmail = currentUser.email;
+                    final userName = currentUser.displayName;
 
-              // Add registration to Firestore
-              await FirebaseFirestore.instance
-                  .collection('registrations')
-                  .doc(comp['name'])
-                  .set(
-                      {
-                    'eventName': comp['name'],
-                    'eventDate': comp['date'],
-                    'registrants': FieldValue.arrayUnion([
-                      {
-                        'userName': userName,
-                        'userEmail': userEmail,
-                      }
-                    ]),
-                    // Add more fields as needed
-                  },
-                      SetOptions(
-                          merge:
-                              true)); // Use merge option to merge instead of overwrite
+                    // Add registration to Firestore
+                    await FirebaseFirestore.instance
+                        .collection('registrations')
+                        .doc(widget.comp['name'])
+                        .set(
+                            {
+                          'eventName': widget.comp['name'],
+                          'eventDate': widget.comp['date'],
+                          'registrants': FieldValue.arrayUnion([
+                            {
+                              'userName': userName,
+                              'userEmail': userEmail,
+                            }
+                          ]),
+                          // Add more fields as needed
+                        },
+                            SetOptions(
+                                merge:
+                                    true)); // Use merge option to merge instead of overwrite
 
-              // Navigate to registration complete page
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CompRegistrationCompletePage(),
-                ),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('User not logged in'),
-                  duration: Duration(seconds: 3),
-                ),
-              );
-            }
-          } catch (error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error: $error'),
-                duration: Duration(seconds: 3),
-              ),
-            );
-          }
-        },
+                    // Navigate to registration complete page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CompRegistrationCompletePage(),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('User not logged in'),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                  }
+                } catch (error) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: $error'),
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                }
+              },
         child: Container(
           color: Color(0xFF7E53D6),
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.event),
+              Icon(isRegistered ? Icons.check : Icons.event),
               SizedBox(width: 10),
               Text(
-                'Register Event',
+                isRegistered ? 'Already Registered' : 'Register Event',
                 style: TextStyle(fontSize: 18),
               ),
             ],
@@ -330,6 +365,7 @@ class CompetitionDetailsPage extends StatelessWidget {
     );
   }
 }
+
 
 class CompRegistrationCompletePage extends StatelessWidget {
   @override

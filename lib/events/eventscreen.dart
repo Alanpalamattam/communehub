@@ -117,11 +117,29 @@ class EventsPage extends StatelessWidget {
     );
   }
 }
+// Replace with your actual import
 
 class EventDetailsPage extends StatelessWidget {
   final Map<String, dynamic> event;
 
   EventDetailsPage({required this.event});
+
+  Future<bool> _checkIfRegistered(String eventName) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      final userEmail = currentUser.email;
+      final doc = await FirebaseFirestore.instance.collection('registrations').doc(eventName).get();
+      if (doc.exists) {
+        final registrants = doc.data()?['registrants'] ?? [];
+        for (var registrant in registrants) {
+          if (registrant['userEmail'] == userEmail) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -260,77 +278,115 @@ class EventDetailsPage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: GestureDetector(
-        onTap: () async {
-          try {
-            final currentUser = FirebaseAuth.instance.currentUser;
-            if (currentUser != null) {
-              final userEmail = currentUser.email;
-              final userName = currentUser.displayName;
-
-              // Add registration to Firestore
-              await FirebaseFirestore.instance
-                  .collection('registrations')
-                  .doc(event['name'])
-                  .set(
-                      {
-                    'eventName': event['name'],
-                    'eventDate': event['date'],
-                    'registrants': FieldValue.arrayUnion([
-                      {
-                        'userName': userName,
-                        'userEmail': userEmail,
-                      }
-                    ]),
-                    // Add more fields as needed
-                  },
-                      SetOptions(
-                          merge:
-                              true)); // Use merge option to merge instead of overwrite
-
-              // Navigate to registration complete page
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => RegistrationCompletePage(),
-                ),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('User not logged in'),
-                  duration: Duration(seconds: 3),
-                ),
-              );
-            }
-          } catch (error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error: $error'),
-                duration: Duration(seconds: 3),
+      bottomNavigationBar: FutureBuilder<bool>(
+        future: _checkIfRegistered(event['name']),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Container(
+              color: Color(0xFF7E53D6),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                ],
               ),
             );
           }
-        },
-        child: Container(
-          color: Color(0xFF7E53D6),
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.event),
-              SizedBox(width: 10),
-              Text(
-                'Register Event',
-                style: TextStyle(fontSize: 18),
+
+          if (snapshot.hasError) {
+            return Container(
+              color: Color(0xFF7E53D6),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error),
+                  SizedBox(width: 10),
+                  Text(
+                    'Error checking registration status',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            );
+          }
+
+          final isRegistered = snapshot.data ?? false;
+
+          return GestureDetector(
+            onTap: isRegistered ? null : () async {
+              try {
+                final currentUser = FirebaseAuth.instance.currentUser;
+                if (currentUser != null) {
+                  final userEmail = currentUser.email;
+                  final userName = currentUser.displayName;
+
+                  // Add registration to Firestore
+                  await FirebaseFirestore.instance
+                      .collection('registrations')
+                      .doc(event['name'])
+                      .set(
+                    {
+                      'eventName': event['name'],
+                      'eventDate': event['date'],
+                      'registrants': FieldValue.arrayUnion([
+                        {
+                          'userName': userName,
+                          'userEmail': userEmail,
+                        }
+                      ]),
+                      // Add more fields as needed
+                    },
+                    SetOptions(merge: true), // Use merge option to merge instead of overwrite
+                  );
+
+                  // Navigate to registration complete page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RegistrationCompletePage(),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('User not logged in'),
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                }
+              } catch (error) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error: $error'),
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
+            child: Container(
+              color: Color(0xFF7E53D6),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(isRegistered ? Icons.check : Icons.event),
+                  SizedBox(width: 10),
+                  Text(
+                    isRegistered ? 'Already Registered' : 'Register Event',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 }
+
 
 void main() {
   runApp(MaterialApp(
