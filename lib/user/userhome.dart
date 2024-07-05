@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:communehub/community/communityhome.dart';
 import 'package:communehub/competitions/competitionscreen.dart';
 import 'package:communehub/events/eventscreen.dart';
+import 'package:communehub/execom_call/execom_main.dart';
 import 'package:communehub/user/calendarr.dart';
 import 'package:communehub/user/loginscreen.dart';
 import 'package:communehub/user/notifications.dart';
@@ -203,7 +204,7 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => EventsPage()),
+                    MaterialPageRoute(builder: (context) => MyWidget()),
                   );
                 },
                 icon: AnimatedContainer(

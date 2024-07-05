@@ -2,6 +2,7 @@ import 'package:communehub/admin/adminnotification.dart';
 import 'package:communehub/admin/registrants.dart';
 import 'package:communehub/competitions/adminlisting.dart';
 import 'package:communehub/events/adminlisting.dart';
+import 'package:communehub/execom_call/execom_admin.dart';
 import 'package:communehub/onboarding/useroradmin.dart';
 import 'package:flutter/material.dart';
 
@@ -114,7 +115,7 @@ class Adminpage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => RegistrationsPage(),
+                                builder: (context) => ExecomDetailsPage(),
                               ),
                             );
                           },
