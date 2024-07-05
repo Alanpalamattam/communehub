@@ -1,3 +1,5 @@
+import 'package:communehub/competitions/competitionscreen.dart';
+import 'package:communehub/events/eventscreen.dart';
 import 'package:communehub/onboarding/useroradmin.dart';
 import 'package:communehub/user/loginscreen.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
-                          CheckRegisteredEventsAndCompetitionsPage()),
+                          RegisteredEventsPage()),
                 );
 
                 // Handle registered events tap
@@ -150,94 +152,110 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-class CheckRegisteredEventsAndCompetitionsPage extends StatefulWidget {
-  @override
-  _CheckRegisteredEventsAndCompetitionsPageState createState() =>
-      _CheckRegisteredEventsAndCompetitionsPageState();
-}
 
-class _CheckRegisteredEventsAndCompetitionsPageState
-    extends State<CheckRegisteredEventsAndCompetitionsPage> {
-  late String _userName = '';
-  bool _loading = true;
-  bool _hasRegistered = false;
-  List<Map<String, dynamic>> _registeredEvents = [];
-
-  @override
-  void initState() {
-    super.initState();
-
-    _fetchUserName();
-    _checkRegistrations();
-  }
-
-  Future<void> _fetchUserName() async {
-    final User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      if (userDoc.exists) {
-        setState(() {
-          _userName = userDoc['name'];
-        });
-      }
-    }
-  }
-
-  Future<void> _checkRegistrations() async {
-    try {
-      final QuerySnapshot<Map<String, dynamic>> snapshot =
-          await FirebaseFirestore.instance
-              .collection('registrations')
-              .where('registrants', arrayContains: _userName)
-              .get();
-
-      if (snapshot.docs.isNotEmpty) {
-        setState(() {
-          _registeredEvents = snapshot.docs.map((doc) => doc.data()).toList();
-          _hasRegistered = true;
-          _loading = false;
-        });
-      } else {
-        setState(() {
-          _loading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _loading = false;
-      });
-      print('Error checking registrations: $e');
-    }
-  }
-
+class RegisteredEventsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Registered Events and Competitions'),
+        title: Text('Registered Events'),
+        backgroundColor: Color(0xFF7E53D6),
       ),
-      body: _loading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : _hasRegistered
-              ? ListView.builder(
-                  itemCount: _registeredEvents.length,
-                  itemBuilder: (context, index) {
-                    final event = _registeredEvents[index];
-                    return ListTile(
-                      title: Text(event['eventName']),
-                      subtitle: Text(event['eventDate']),
-                    );
-                  },
-                )
-              : Center(
-                  child: Text(
-                      'You have not registered for any events or competitions.'),
-                ),
+      body: FutureBuilder(
+        future: _fetchRegisteredEvents(),
+        builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No registered events'));
+          } else {
+            final registeredEvents = snapshot.data!;
+            return ListView.builder(
+              itemCount: registeredEvents.length,
+              itemBuilder: (context, index) {
+                final event = registeredEvents[index];
+                final eventName = event['eventName'] ?? 'No Name';
+                final eventDate = event['eventDate'] ?? 'No Date';
+                final eventTime = event['eventTime'] ?? 'No Time';
+                final eventType = event['eventType'] ?? ''; // Add eventType
+
+                return Card(
+                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 4,
+                  child: InkWell(
+                    onTap: () {
+                      // Check eventType to determine navigation
+                      if (eventType == 'competition') {
+                        // Navigate to competition details page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CompdisplayPage(),
+                          ),
+                        );
+                      } else {
+                        // Navigate to event details page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EventsPage(),
+                          ),
+                        );
+                      }
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ListTile(
+                        title: Text(
+                          eventName,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(eventDate),
+                           // Text(eventTime),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+        },
+      ),
     );
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchRegisteredEvents() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      throw Exception('User not logged in');
+    }
+    final userEmail = currentUser.email;
+
+    final snapshot = await FirebaseFirestore.instance.collection('registrations').get();
+    final registeredEvents = snapshot.docs
+        .where((doc) => (doc.data()['registrants'] as List)
+            .any((registrant) => registrant['userEmail'] == userEmail))
+        .map((doc) => doc.data())
+        .toList();
+
+    return registeredEvents.map((event) {
+      return {
+        'eventName': event['eventName'],
+        'eventDate': event['eventDate'],
+        'eventTime': event['eventTime'],
+        'eventType': event['eventType'], // Add eventType
+      };
+    }).toList();
   }
 }
