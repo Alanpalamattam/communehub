@@ -1,9 +1,11 @@
+// ignore_for_file: depend_on_referenced_packages
+
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:communehub/community/communityhome.dart';
 import 'package:communehub/events/admininput.dart';
 import 'package:communehub/events/adminlisting.dart';
 import 'package:communehub/events/eventscreen.dart';
 import 'package:communehub/firebase_options.dart';
-
 import 'package:communehub/onboarding/onboarding.dart';
 import 'package:communehub/onboarding/useroradmin.dart';
 import 'package:communehub/user/loginscreen.dart';
@@ -19,6 +21,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   runApp(const MyApp());
 }
 

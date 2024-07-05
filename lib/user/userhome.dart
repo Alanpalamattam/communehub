@@ -119,7 +119,7 @@ class _HomePageState extends State<HomePage> {
               },
               child: Padding(
                 padding: const EdgeInsets.only(right: 16.0),
-                child: Icon(Icons.notifications_none),
+                child: Icon(Icons.notifications_on_outlined),
               ),
             ),
             SizedBox(height: 10),
@@ -293,83 +293,88 @@ class _HomePageState extends State<HomePage> {
             child: ListView.builder(
               itemCount: _events.length,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  height: 160,
-                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.grey[200],
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 5,
-                        blurRadius: 7,
-                        offset: Offset(0, 3), // changes position of shadow
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EventsPage(),
                       ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width * 0.35,
-                        padding: EdgeInsets.symmetric(horizontal: 8.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            bottomLeft: Radius.circular(10),
-                            topRight: Radius.circular(10),
-                            bottomRight: Radius.circular(10),
+                    );
+                  },
+                  child: Container(
+                    height: 160,
+                    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.grey[200],
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 5,
+                          blurRadius: 7,
+                          offset: Offset(0, 3), // changes position of shadow
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.35,
+                          padding: EdgeInsets.symmetric(horizontal: 8.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              bottomLeft: Radius.circular(10),
+                              topRight: Radius.circular(10),
+                              bottomRight: Radius.circular(10),
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              bottomLeft: Radius.circular(10),
+                              topRight: Radius.circular(10),
+                              bottomRight: Radius.circular(10),
+                            ),
+                            child: Image.network(
+                              _events[index].imageUrl, // Use network image
+                              fit: BoxFit
+                                  .cover, // Ensure the image covers the box
+                              height: 130, // Adjust the height of the image
+                            ),
                           ),
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            bottomLeft: Radius.circular(10),
-                            topRight: Radius.circular(10),
-                            bottomRight: Radius.circular(10),
-                          ),
-                          child: Image.network(
-                            _events[index].imageUrl, // Use network image
-                            fit:
-                                BoxFit.cover, // Ensure the image covers the box
-                            height: 130, // Adjust the height of the image
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                _events[index].name,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _events[index].name,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                '${_events[index].timings}', // Correct field name
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                '${_events[index].modeOfConduct ?? "N/A"}',
-                                style: TextStyle(fontSize: 18),
-                              ),
-
-                              // Text(
-                              //   'Description: ${_events[index].description}',
-                              //   style: TextStyle(fontSize: 16),
-                              // ),
-                            ],
+                                SizedBox(height: 8),
+                                Text(
+                                  '${_events[index].timings}', // Correct field name
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  '${_events[index].modeOfConduct ?? "N/A"}',
+                                  style: TextStyle(fontSize: 18),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               },
@@ -418,7 +423,7 @@ class _HomePageState extends State<HomePage> {
                     // Navigate to UserInputPage when floating action button is pressed
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => CalendarApp()),
+                      MaterialPageRoute(builder: (context) => CalendarScreen()),
                     );
                   },
                   icon: LineIcons.calendar,

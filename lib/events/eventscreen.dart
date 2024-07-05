@@ -1,3 +1,4 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:communehub/events/ticketpage.dart';
 import 'package:communehub/user/userhome.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -128,7 +129,10 @@ class EventDetailsPage extends StatelessWidget {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
       final userEmail = currentUser.email;
-      final doc = await FirebaseFirestore.instance.collection('registrations').doc(eventName).get();
+      final doc = await FirebaseFirestore.instance
+          .collection('registrations')
+          .doc(eventName)
+          .get();
       if (doc.exists) {
         final registrants = doc.data()?['registrants'] ?? [];
         for (var registrant in registrants) {
@@ -139,6 +143,74 @@ class EventDetailsPage extends StatelessWidget {
       }
     }
     return false;
+  }
+
+  void _registerEvent(BuildContext context) async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        final userEmail = currentUser.email;
+        final userName = currentUser.displayName;
+
+        // Add registration to Firestore
+        await FirebaseFirestore.instance
+            .collection('registrations')
+            .doc(event['name'])
+            .set(
+          {
+            'eventName': event['name'],
+            'eventDate': event['date'],
+            'registrants': FieldValue.arrayUnion([
+              {
+                'userName': userName,
+                'userEmail': userEmail,
+              }
+            ]),
+          },
+          SetOptions(
+              merge: true), // Use merge option to merge instead of overwrite
+        );
+// Trigger cloud function to send confirmation email
+        Future<void> sendConfirmationEmail(
+            String eventName, String userEmail) async {
+          try {
+            HttpsCallable callable = FirebaseFunctions.instance
+                .httpsCallable('sendConfirmationEmail');
+            final result = await callable.call({
+              'eventName': eventName,
+              'userEmail': userEmail,
+            });
+            // Handle result if necessary
+            print('Confirmation email sent successfully');
+          } catch (error) {
+            print('Error sending confirmation email: $error');
+            // Handle error as needed
+          }
+        }
+
+        // Navigate to registration complete page
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RegistrationCompletePage(),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('User not logged in'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $error'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   @override
@@ -315,56 +387,7 @@ class EventDetailsPage extends StatelessWidget {
           final isRegistered = snapshot.data ?? false;
 
           return GestureDetector(
-            onTap: isRegistered ? null : () async {
-              try {
-                final currentUser = FirebaseAuth.instance.currentUser;
-                if (currentUser != null) {
-                  final userEmail = currentUser.email;
-                  final userName = currentUser.displayName;
-
-                  // Add registration to Firestore
-                  await FirebaseFirestore.instance
-                      .collection('registrations')
-                      .doc(event['name'])
-                      .set(
-                    {
-                      'eventName': event['name'],
-                      'eventDate': event['date'],
-                      'registrants': FieldValue.arrayUnion([
-                        {
-                          'userName': userName,
-                          'userEmail': userEmail,
-                        }
-                      ]),
-                      // Add more fields as needed
-                    },
-                    SetOptions(merge: true), // Use merge option to merge instead of overwrite
-                  );
-
-                  // Navigate to registration complete page
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RegistrationCompletePage(),
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('User not logged in'),
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
-                }
-              } catch (error) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Error: $error'),
-                    duration: Duration(seconds: 3),
-                  ),
-                );
-              }
-            },
+            onTap: isRegistered ? null : () => _registerEvent(context),
             child: Container(
               color: Color(0xFF7E53D6),
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -386,7 +409,6 @@ class EventDetailsPage extends StatelessWidget {
     );
   }
 }
-
 
 void main() {
   runApp(MaterialApp(

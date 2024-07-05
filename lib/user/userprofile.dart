@@ -1,6 +1,7 @@
 import 'package:communehub/competitions/competitionscreen.dart';
 import 'package:communehub/events/eventscreen.dart';
 import 'package:communehub/onboarding/useroradmin.dart';
+import 'package:communehub/user/aboutpage.dart';
 import 'package:communehub/user/loginscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -107,8 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          RegisteredEventsPage()),
+                      builder: (context) => RegisteredEventsPage()),
                 );
 
                 // Handle registered events tap
@@ -125,9 +125,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: 20),
             ListTile(
               leading: Icon(Icons.info),
-              title: Text('Information'),
+              title: Text('About'),
               onTap: () {
-                // Handle information tap
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AboutPage(),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -151,7 +156,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-
 
 class RegisteredEventsPage extends StatelessWidget {
   @override
@@ -183,7 +187,8 @@ class RegisteredEventsPage extends StatelessWidget {
 
                 return Card(
                   margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   elevation: 4,
                   child: InkWell(
                     onTap: () {
@@ -220,7 +225,7 @@ class RegisteredEventsPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(eventDate),
-                           // Text(eventTime),
+                            // Text(eventTime),
                           ],
                         ),
                       ),
@@ -242,7 +247,8 @@ class RegisteredEventsPage extends StatelessWidget {
     }
     final userEmail = currentUser.email;
 
-    final snapshot = await FirebaseFirestore.instance.collection('registrations').get();
+    final snapshot =
+        await FirebaseFirestore.instance.collection('registrations').get();
     final registeredEvents = snapshot.docs
         .where((doc) => (doc.data()['registrants'] as List)
             .any((registrant) => registrant['userEmail'] == userEmail))

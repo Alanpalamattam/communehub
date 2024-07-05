@@ -9,6 +9,8 @@ nlp = spacy.load("en_core_web_md")
 
 app = Flask(__name__)
 
+# Initialize Firebase Admin with your service account key
+
 
 
 @app.route('/submit', methods=['POST'])
