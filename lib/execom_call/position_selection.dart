@@ -1,3 +1,7 @@
+import 'package:communehub/execom_call/postiondetails/chairdetails.dart';
+import 'package:communehub/execom_call/postiondetails/contentteamdetails.dart';
+import 'package:communehub/execom_call/postiondetails/designteamdetails.dart';
+import 'package:communehub/execom_call/postiondetails/webteamdetails.dart';
 import 'package:communehub/execom_call/questions1.dart';
 import 'package:flutter/material.dart';
 
@@ -72,7 +76,17 @@ class PositionSelection extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ChairDetailsPage()),
+                          );
+                        },
+                      
                       child: _buildChairCard(),
+                      ),
                     ),
                     Expanded(
                       child: GestureDetector(
@@ -80,7 +94,7 @@ class PositionSelection extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => QuestionsPage()),
+                                builder: (context) => WebTeamDetailsPage()),
                           );
                         },
                         child: _buildWebTeamCard(),
@@ -91,10 +105,28 @@ class PositionSelection extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => DesignTeamDetailsPage()),
+                          );
+                        },
                       child: _buildDesignTeamCard(),
+                      ),
                     ),
                     Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ContentTeamDetailsPage()),
+                          );
+                        },
                       child: _buildContentTeamCard(),
+                      ),
                     ),
                   ],
                 ),
@@ -218,7 +250,7 @@ Widget _buildDesignTeamCard() {
           "Design\nTeam",
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 20.0,
+            fontSize: 15.0,
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
@@ -259,7 +291,7 @@ Widget _buildContentTeamCard() {
           "Content\nTeam",
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 20.0,
+            fontSize: 15.0,
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),

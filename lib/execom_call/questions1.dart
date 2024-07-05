@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:communehub/execom_call/position_selection.dart';
 import 'package:communehub/execom_call/questions2.dart';
 import 'package:flutter/material.dart';
 
@@ -264,7 +265,11 @@ class _QuestionsPageState extends State<QuestionsPage> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Handle back button
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PositionSelection()),
+                        );
                       },
                       child:
                           Text('Back'), // Add child property with Text widget

@@ -182,7 +182,7 @@ class _MyWidgetState extends State<MyWidget> {
                           child: Opacity(
                             opacity: 1.0,
                             child: Text(
-                              "   Call for execom",
+                              "   IEEE Call for execom",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 27.0,

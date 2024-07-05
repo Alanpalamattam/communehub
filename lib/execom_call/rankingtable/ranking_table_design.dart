@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class RankingTablePage extends StatelessWidget {
+class RankingTablePageDesign extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ranking Table (Web Team)'),
+        title: Text('Ranking Table (Design Team)'),
         backgroundColor: Color(0xFFE7E0C9), // Background color of app bar
       ),
       body: Container(
@@ -78,3 +78,4 @@ class RankingTablePage extends StatelessWidget {
     );
   }
 }
+

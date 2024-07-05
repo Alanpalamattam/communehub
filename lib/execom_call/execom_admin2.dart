@@ -1,4 +1,7 @@
 import 'package:communehub/execom_call/execom_rankingtable.dart';
+import 'package:communehub/execom_call/rankingtable/ranking_table_content.dart';
+import 'package:communehub/execom_call/rankingtable/ranking_table_design.dart';
+import 'package:communehub/execom_call/rankingtable/rankingt_table_chair.dart';
 import 'package:flutter/material.dart';
 
 class PositionSelectionPage extends StatelessWidget {
@@ -18,7 +21,17 @@ class PositionSelectionPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildChairCard(),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RankingTablePageChair()),
+                        );
+                      },
+                  // Add spacing between cards
+                  child : _buildChairCard(),
+                  ),
                   SizedBox(width: 20), 
                   GestureDetector(
                       onTap: () {
@@ -37,15 +50,37 @@ class PositionSelectionPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildDesignTeamCard(),
-                  SizedBox(width: 20), // Add spacing between cards
-                  _buildContentTeamCard(),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RankingTablePageDesign()),
+                        );
+                      },
+                  // Add spacing between cards
+                  child : _buildDesignTeamCard(),
+                  ),
+                  SizedBox(width: 20),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RankingTablePageContent()),
+                        );
+                      },
+                  // Add spacing between cards
+                  child : _buildContentTeamCard(),
+                  ), // Add spacing between cards
+                  
                 ],
               ),
             ],
           ),
         ),
       ),
+      
     );
   }
 
